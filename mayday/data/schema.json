@@ -1,0 +1,85 @@
+{
+    "sections": {
+        "name": "TEXT PRIMARY KEY",
+        "meta": "JSON"
+    },
+    "session": {
+        "cookie": "TEXT PRIMARY KEY",
+        "timestamp": "TIMESTAMP",
+        "username": "TEXT",
+        "admin": "BOOLEAN",
+        "meta": "JSON"
+    },
+    "events": {
+        "id": "SERIAL PRIMARY KEY",
+        "cookie": "TEXT",
+        "event": "TEXT",
+        "type": "TEXT"
+    },
+    "website_administrators": {
+        "id": "SERIAL PRIMARY KEY",
+        "username": "TEXT NOT NULL",
+        "email": "TEXT NOT NULL",
+        "full_name": "TEXT NOT NULL",
+        "password_hash": "TEXT NOT NULL",
+        "is_active": "BOOLEAN DEFAULT true",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "last_login": "TIMESTAMP"
+    },
+    "descriptions": {
+        "section": "TEXT PRIMARY KEY",
+        "text": "TEXT"
+    },
+    "announcement": {
+        "id": "SERIAL PRIMARY KEY",
+        "text": "TEXT",
+        "type": "TEXT DEFAULT 'info'",
+        "active": "BOOLEAN DEFAULT true",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "blog_posts": {
+        "id": "SERIAL PRIMARY KEY",
+        "title": "TEXT NOT NULL",
+        "author": "TEXT DEFAULT 'Mayday Plumbing Team'",
+        "content": "TEXT NOT NULL",
+        "image_data": "TEXT",
+        "image_size": "TEXT DEFAULT 'medium'",
+        "published": "BOOLEAN DEFAULT true",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "services": {
+        "id": "SERIAL PRIMARY KEY",
+        "title": "VARCHAR(255) NOT NULL",
+        "description": "TEXT",
+        "icon": "VARCHAR(100) NOT NULL",
+        "display_order": "INTEGER DEFAULT 0",
+        "is_active": "BOOLEAN DEFAULT true",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "faqs": {
+        "id": "SERIAL PRIMARY KEY",
+        "question": "TEXT NOT NULL",
+        "answer": "TEXT NOT NULL",
+        "display_order": "INTEGER DEFAULT 0",
+        "is_active": "BOOLEAN DEFAULT true",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    "api_cache": {
+        "id": "SERIAL PRIMARY KEY",
+        "cache_type": "VARCHAR(50) NOT NULL",
+        "data": "JSON NOT NULL",
+        "cached_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "expires_at": "TIMESTAMP NOT NULL",
+        "is_valid": "BOOLEAN DEFAULT true"
+    },
+    "font_settings": {
+        "setting_key": "VARCHAR(50) PRIMARY KEY",
+        "setting_value": "TEXT NOT NULL",
+        "is_active": "BOOLEAN DEFAULT true",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    }
+}

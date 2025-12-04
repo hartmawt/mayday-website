@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Mayday Plumbing</title>
+    <meta name="description" content="Admin login for Mayday Plumbing management system.">
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    {% if recaptcha_site_key %}
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}" async defer></script>
+    {% endif %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="/static/img/mayday-translucent.png" alt="Mayday Plumbing Logo">
+                <span>Mayday Plumbing</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/#services" class="nav-link">Services</a>
+                <a href="/about" class="nav-link">About</a>
+                <a href="/#contact" class="nav-link">Contact</a>
+                <a href="https://client.housecallpro.com/customer_portal/request-link?token=e57304ab4e974b93a5b90c2084ba3d1a" target="_blank" class="nav-link">Invoices</a>
+            </div>
+            <div class="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Event Notification -->
+    {% if event %}
+    <div id="notification" class="notification notification-{{ event_type }}">
+        <div class="container">
+            <span class="notification-message">{{ event }}</span>
+            <button class="notification-close">&times;</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Login Section -->
+    <section id="login" class="login-section">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-image">
+                    <div class="image-container" data-image-key="benny">
+                        <img src="/static/img/benny-piece.png" alt="Benny" class="admin-mascot">
+                    </div>
+                </div>
+                <h2>Admin Login</h2>
+                <form action="/login" class="login-form" method="POST">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="/static/img/mayday-translucent.png" alt="Mayday Plumbing">
+                        <h3>Mayday Plumbing LLC</h3>
+                    </div>
+                    <p>The Help Behind Every Mayday! Licensed, bonded, and insured.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/#services">Services</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/#contact">Contact</a></li>
+                        <li><a href="/#faq">FAQ</a></li>
+                        <li><a href="/blog">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/#services">Leak Detection & Repair</a></li>
+                        <li><a href="/#services">Plumbing Fixture Installation</a></li>
+                        <li><a href="/#services">Water Heater Services</a></li>
+                        <li><a href="/#services">Whole Home Repipe</a></li>
+                        <li><a href="/#services">Sump & Sewage Pump Services</a></li>
+                        <li><a href="/#services">Drain Cleaning & Jetting</a></li>
+                        <li><a href="/#services">Sewer Line Services</a></li>
+                        <li><a href="/#services">Plumbing Inspections</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> <a class="phone-link" href="tel:5405214181">(540) 521-4181</a></p>
+                        <p><i class="fas fa-map-marker-alt"></i> Serving Virginia Areas</p>
+                        <p><i class="fas fa-clock"></i> Mon-Fri: 8:00AM-4:00PM</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Mayday Plumbing LLC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/index.js"></script>
+
+    {% if recaptcha_site_key %}
+    <script>
+    // reCAPTCHA v3 for login form
+    document.querySelector('.login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+
+        grecaptcha.ready(function() {
+            grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'login'}).then(function(token) {
+                // Add token to form
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'recaptcha_token';
+                tokenInput.value = token;
+                form.appendChild(tokenInput);
+
+                // Submit form
+                form.submit();
+            });
+        });
+    });
+    </script>
+    {% endif %}
+    <style>
+        .login-image {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-mascot {
+            width: 150px;
+            height: auto;
+            border-radius: 8px;
+        }
+        
+        .login-container {
+            width: 500px;
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                width: calc(100% - 2rem);
+                max-width: none;
+                margin: 1rem;
+                margin-top: 90px;
+                padding: 1.5rem;
+            }
+            
+            .admin-mascot {
+                width: 120px;
+            }
+        }
+        
+        .login-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Mayday Plumbing</title>
+    <meta name="description" content="Learn about Mayday Plumbing - professional plumbing services in Salem, Roanoke, and surrounding Virginia areas.">
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family={{ font_settings.heading_font|replace(' ', '+') }}:wght@300;400;500;600;700&family={{ font_settings.body_font|replace(' ', '+') }}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Dynamic font settings from database -->
+    <style>
+        :root {
+            --font-heading: '{{ font_settings.heading_font }}', sans-serif;
+            --font-body: '{{ font_settings.body_font }}', sans-serif;
+        }
+
+        {% if font_settings.custom_css %}
+        /* Custom CSS from admin panel */
+        {{ font_settings.custom_css|safe }}
+        {% endif %}
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="image-container" data-image-key="logo">
+                    <img src="/static/img/mayday-translucent.png" alt="Mayday Plumbing Logo">
+                    {% if admin == true %}
+                    <button class="image-upload-btn" title="Replace Logo">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                    {% endif %}
+                </div>
+                <span>Mayday Plumbing</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/#services" class="nav-link">Services</a>
+                <a href="/about" class="nav-link active">About</a>
+                <a href="/#contact" class="nav-link">Contact</a>
+                <a href="/blog" class="nav-link">Blog</a>
+                <a href="https://client.housecallpro.com/customer_portal/request-link?token=e57304ab4e974b93a5b90c2084ba3d1a" target="_blank" class="nav-link">Invoices</a>
+                {% if admin == true %}
+                <a href="/#admin" class="nav-link">Admin</a>
+                <a href="/logout" class="nav-link">Logout</a>
+                {% endif %}
+            </div>
+            <div class="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Event Notification -->
+    {% if event %}
+    <div id="notification" class="notification notification-{{ event_type }}">
+        <div class="container">
+            <span class="notification-message">{{ event }}</span>
+            <button class="notification-close">&times;</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- About Header -->
+    <section class="about-header">
+        <div class="container">
+            <h1>{{ descriptions.get('about-title', 'About Mayday Plumbing') }}</h1>
+            <p>{{ descriptions.get('about-subtitle', 'Professional, reliable, and committed to excellence in plumbing services throughout Virginia.') }}</p>
+        </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="about-content-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-main-content">
+                    <!-- About Section 1 -->
+                    <div class="about-section">
+                        <div class="about-text-content">
+                            <h2>{{ descriptions.get('about-section1-title', 'Our Story') }}</h2>
+                            <div class="about-text">{{ descriptions.get('about-section1-text', 'At Mayday Plumbing, we have been proudly serving the Salem, Roanoke, and surrounding Virginia areas with professional plumbing services. Our commitment to excellence and customer satisfaction has made us a trusted name in the community.') | safe }}</div>
+                        </div>
+                        <div class="about-image">
+                            <div class="image-container" data-image-key="about1">
+                                <img src="/static/img/headshot.jpeg" alt="About Image 1">
+                                {% if admin == true %}
+                                <button class="image-upload-btn" title="Replace Image">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About Section 2 -->
+                    <div class="about-section reverse">
+                        <div class="about-text-content">
+                            <h2>{{ descriptions.get('about-section2-title', 'Our Team') }}</h2>
+                            <div class="about-text">{{ descriptions.get('about-section2-text', 'Our experienced team of licensed professionals brings years of expertise to every job. We pride ourselves on providing reliable, efficient, and honest plumbing services to residential and commercial customers.') | safe }}</div>
+                        </div>
+                        <div class="about-image">
+                            <div class="image-container" data-image-key="about2">
+                                <img src="/static/img/family.JPG" alt="About Image 2">
+                                {% if admin == true %}
+                                <button class="image-upload-btn" title="Replace Image">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About Section 3 -->
+                    <div class="about-section">
+                        <div class="about-text-content">
+                            <h2>{{ descriptions.get('about-section3-title', 'Our Commitment') }}</h2>
+                            <div class="about-text">{{ descriptions.get('about-section3-text', 'We are committed to providing exceptional service with transparent pricing and no hidden fees. As a licensed Virginia Class A Contractor, we stand behind our work with comprehensive warranties and guarantee your satisfaction.') | safe }}</div>
+                        </div>
+                        <div class="about-image">
+                            <div class="image-container" data-image-key="about3">
+                                <img src="/static/img/benny-piece.png" alt="About Image 3">
+                                {% if admin == true %}
+                                <button class="image-upload-btn" title="Replace Image">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Features -->
+                <div class="about-features">
+                    <div class="feature-box">
+                        <i class="fas fa-certificate"></i>
+                        <h3>Class A Contractor</h3>
+                        <p>Licensed Virginia Class A Contractor #2705191750</p>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-medal"></i>
+                        <h3>Quality Guarantee</h3>
+                        <p>We stand behind our work with comprehensive warranties</p>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-dollar-sign"></i>
+                        <h3>Fair Pricing</h3>
+                        <p>Transparent, upfront pricing with no hidden fees</p>
+                    </div>
+                    <div class="feature-box">
+                        <i class="fas fa-award"></i>
+                        <h3><a href="https://www.bbb.org/us/va/troutville/profile/plumber/mayday-plumbing-llc-0613-90039763" target="_blank" style="color: inherit; text-decoration: none;">Better Business Bureau</a></h3>
+                        <p>Trusted member with excellent rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <div class="image-container" data-image-key="logo">
+                            <img src="/static/img/mayday-translucent.png" alt="Mayday Plumbing">
+                            {% if admin == true %}
+                            <button class="image-upload-btn" title="Replace Logo">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                            {% endif %}
+                        </div>
+                        <h3>Mayday Plumbing LLC</h3>
+                    </div>
+                    <p>The Help Behind Every Mayday! Licensed, bonded, and insured.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin-login">Admin Login</a></li>
+                        <li><a href="/#services">Services</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/#contact">Contact</a></li>
+                        <li><a href="/#faq">FAQ</a></li>
+                        <li><a href="/blog">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="/#services">Leak Detection & Repair</a></li>
+                        <li><a href="/#services">Plumbing Fixture Installation</a></li>
+                        <li><a href="/#services">Water Heater Services</a></li>
+                        <li><a href="/#services">Whole Home Repipe</a></li>
+                        <li><a href="/#services">Sump & Sewage Pump Services</a></li>
+                        <li><a href="/#services">Drain Cleaning & Jetting</a></li>
+                        <li><a href="/#services">Sewer Line Services</a></li>
+                        <li><a href="/#services">Plumbing Inspections</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> <a class="phone-link" href="tel:5405214181">(540) 521-4181</a></p>
+                        <p><i class="fas fa-map-marker-alt"></i> Serving Virginia Areas</p>
+                        <p><i class="fas fa-clock"></i> Mon-Fri: 8:00AM-4:00PM</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Mayday Plumbing LLC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header">
+                <div id="confirmModalIcon" class="confirm-modal-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3 id="confirmModalTitle" class="confirm-modal-title">Confirm Action</h3>
+                <p id="confirmModalMessage" class="confirm-modal-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="confirm-modal-actions">
+                <button id="confirmModalCancel" class="confirm-btn confirm-btn-cancel">Cancel</button>
+                <button id="confirmModalConfirm" class="confirm-btn confirm-btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/index.js"></script>
+</body>
+</html>

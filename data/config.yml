@@ -1,0 +1,48 @@
+http:
+  #region routers
+  routers:
+    proxmox:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox.local.example.com`)"
+      middlewares:
+        - secured
+      tls: {}
+      service: proxmox
+  #endregion
+  #region services
+  services:
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.50.4:8006"
+        passHostHeader: true
+  #endregion
+  middlewares:
+    secured:
+      chain:
+        middlewares:
+        - default-headers
+        - secure-headers
+
+    default-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+
+    secure-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+        accessControlMaxAge: 100
+        hostsProxyHeaders:
+          - "X-Forwarded-Host"
+        referrerPolicy: "same-origin"

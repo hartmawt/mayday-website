@@ -1,0 +1,24 @@
+# Traefik and Let's Encrypt Configuration
+# Copy these variables to your .env file and update the values
+
+# Your domain name (must point to your server's IP address)
+DOMAIN=yourdomain.com
+
+# Traefik Dashboard Authentication (optional - generate with: echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g)
+# Example: user 'admin' with password 'password' becomes: admin:$$2y$$10$$...
+# Leave empty to disable dashboard authentication
+TRAEFIK_AUTH_USERS=admin:$$2y$$10$$example_hash_here
+
+# Database Configuration (existing)
+POSTGRES_ADMIN_PASSWORD=your_postgres_password
+POSTGRES_ADMIN_USER=your_postgres_user
+
+# Application Configuration (existing)
+HOUSECALLPRO_USERNAME=your_housecallpro_username
+HOUSECALLPRO_PASSWORD=your_housecallpro_password
+SERVICE_CATEGORY=your_service_category
+CATEGORY_URI=your_category_uri
+SERVICES_URI=your_services_uri
+CALENDAR_URI=your_calendar_uri
+GMAIL_USERNAME=your_gmail_username
+GMAIL_PASSWORD=your_gmail_password

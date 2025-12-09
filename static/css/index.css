@@ -3680,3 +3680,8 @@ section {
 }
 
 /* Our Team Section */
+.our-team-section {
+    background: var(--bg-primary);
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border-color);
+}

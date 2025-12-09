@@ -3682,9 +3682,52 @@ section {
     border-bottom: 1px solid var(--border-color);
 }
 
+.our-story-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+	gap: 30px;
+}
+
+.our-story-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.our-story-image {
+	border-radius: 1rem;
+	/* Current image's aspect ratio is 1:1 */
+	width: 300px;
+	height: 300px;
+}
+
 /* Our Team Section */
 .our-team-section {
     background: var(--bg-primary);
     padding: 3rem 0;
     border-bottom: 1px solid var(--border-color);
+}
+
+.our-team-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+	gap: 30px;
+}
+
+.our-team-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.our-team-image {
+	border-radius: 1rem;
+	width: 450px;
+	height: 300px;
 }

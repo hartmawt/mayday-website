@@ -141,10 +141,16 @@
 	
 	<!-- Our Story Section -->
 	<section id="our-story" class="our-story-section">
-		<div class="container">
+		<div class="our-story-container">
 			<div class="section-header">
 				<h2>Our Story</h2>
 				<p>Nathan and Amanda May are a power couple with a beautiful family consisting of three magnetic boys. Guided by their ever-smiling mascot, Benny the Buoy, this husband-and-wife team brings warmth, teamwork, and a splash of personality to everything they do. Mayday Plumbing is more than just a plumbing company; we are understanding and treat every client and their home like our own because we know the importance of quality plumbing and what it means for a busy family!</p>
+			</div>
+			
+			<div class="our-story-image">
+				<div class="our-story-image-container">
+					<img class="our-story-image" src="/static/img/headshot.jpeg" alt="Nathan & Amanda & their three children">
+				</div>
 			</div>
 		</div>
 	</section>
@@ -218,7 +224,13 @@
 	
 	<!-- Our Team Section -->
 	<section id="our-team" class="our-team-section">
-		<div class="container">
+		<div class="our-team-container">
+			<div class="our-team-image">
+				<div class="our-team-image-container">
+					<img class="our-team-image" src="/static/img/team-for-home02.jpg" alt="A man provides customer service to woman">
+				</div>
+			</div>
+			
 			<div class="section-header">
 				<h2>Our Team</h2>
 				<p>Our team is like our professional family. Each team member carries our brand, our name, and, of course, Benny, so all our clients know their home is in capable, trustworthy hands. Our team is packed full of experience, skill, and, most importantly, we are all qualified and certified to handle every plumbing challenge we encounter.</p>
@@ -231,7 +243,9 @@
         <div class="container">
             <div class="section-header">
                 <h2>Our Services</h2>
-                <p>{{ descriptions.get('all-services') or 'Complete plumbing solutions for residential and commercial properties' }}</p>
+				<!-- Original dynamic subtitle from Mayday -->
+                <!-- <p>{{ descriptions.get('all-services') or 'Complete plumbing solutions for residential and commercial properties' }}</p> -->
+				<p>Plumbing is more than just tightening bolts on your waterline pipes, unclogging sinks and toilets, and fixing the shower. From precise leak detection to efficient repairs and sewer ejection, Mayday Plumbing does it all. All your plumbing needs will be taken care of with the help of Benny and the Buoy and the team</p>
             </div>
             
             <div class="services-list-grid" id="servicesGrid">

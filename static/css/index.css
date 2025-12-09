@@ -3671,3 +3671,12 @@ section {
     content: '⚠️';
     font-size: 0.875rem;
 }
+
+/* Our Story Section */
+.our-story-section {
+    background: var(--bg-primary);
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Our Team Section */

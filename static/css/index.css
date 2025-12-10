@@ -3743,3 +3743,14 @@ section {
 	height: 300px;
 }
 
+/* About Page */
+.about-services-section {
+    display: flex;
+	flex-direction: column;
+    gap: 3rem;
+    align-items: center;
+    background: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-md);
+}

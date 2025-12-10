@@ -90,7 +90,7 @@
                     <div class="about-section">
                         <div class="about-text-content">
                             <h2>{{ descriptions.get('about-section1-title', 'Our Story') }}</h2>
-							<!-- Original -->
+							<!-- Original dynamic format -->
                             <!-- <div class="about-text">{{ descriptions.get('about-section1-text', 'At Mayday Plumbing, we have been proudly serving the Salem, Roanoke, and surrounding Virginia areas with professional plumbing services. Our commitment to excellence and customer satisfaction has made us a trusted name in the community.') | safe }}</div> -->
 							<div class="about-text">
 								<p>Nathan and Amanda May have created Mayday Plumbing from the ground up. This husband-and-wife duo is unmatched in providing the best licensed plumbers in Roanoke, VA.</p>
@@ -126,10 +126,12 @@
                     </div>
 
                     <!-- About Section 2 -->
-                    <div class="about-section reverse">
+                    <div class="about-section">
                         <div class="about-text-content">
                             <h2>{{ descriptions.get('about-section2-title', 'Our Team') }}</h2>
-                            <div class="about-text">{{ descriptions.get('about-section2-text', 'Our experienced team of licensed professionals brings years of expertise to every job. We pride ourselves on providing reliable, efficient, and honest plumbing services to residential and commercial customers.') | safe }}</div>
+                            <div class="about-text">
+								<p>Our team is experienced, licensed, and has the expertise to provide you with the best licensed plumbers in Roanoke, VA! We're equipped to provide you with a Class A Contractor, guaranteed quality, and fair pricing. What better way to give back to our community than by ensuring each and every home has working, reliable plumbing?</p>
+							</div>
                         </div>
                         <div class="about-image">
                             <div class="image-container" data-image-key="about2">

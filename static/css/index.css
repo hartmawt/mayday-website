@@ -1861,7 +1861,9 @@ section {
 .about-header p {
     font-size: 1.125rem;
     color: rgba(255, 255, 255, 0.9);
-    max-width: 600px;
+	/* original */
+    /* max-width: 600px; */
+	max-width: 800px;
     margin: 0 auto;
 }
 
@@ -3684,7 +3686,7 @@ section {
     font-size: 0.875rem;
 }
 
-/* Our Story Section */
+/* Our Story Section - Home */
 .our-story-section {
     background: var(--bg-primary);
     padding: 3rem 0;
@@ -3713,7 +3715,7 @@ section {
 	height: 300px;
 }
 
-/* Our Team Section */
+/* Our Team Section - Home */
 .our-team-section {
     background: var(--bg-primary);
     padding: 3rem 0;
@@ -3740,3 +3742,4 @@ section {
 	width: 450px;
 	height: 300px;
 }
+

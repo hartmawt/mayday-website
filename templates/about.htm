@@ -72,8 +72,12 @@
     <!-- About Header -->
     <section class="about-header">
         <div class="container">
-            <h1>{{ descriptions.get('about-title', 'About Mayday Plumbing') }}</h1>
-            <p>{{ descriptions.get('about-subtitle', 'Professional, reliable, and committed to excellence in plumbing services throughout Virginia.') }}</p>
+			<!-- Original dynamic title from Mayday -->
+            <!-- <h1>{{ descriptions.get('about-title', 'About Mayday Plumbing') }}</h1> -->
+			<h1>Mayday Plumbing is a Team of Trusted Plumbing Experts Providing Professional Plumbing Services and Leak Detection in Salem, Roanoke, and Daleville, Virginia</h1>
+			<!-- Original dynamic subtitle from Mayday -->
+            <!-- <p>{{ descriptions.get('about-subtitle', 'Professional, reliable, and committed to excellence in plumbing services throughout Virginia.') }}</p> -->
+			<p>Our team is local and ready to serve. Each team member is equipped with the knowledge, skills, and certifications to provide you and your home with the best plumbing services we have to offer. From Salem to Troutville, and everywhere in between, we treat each client and their home with the utmost respect. We are proud to provide trusted licensed plumbers in Roanoke, VA.</p>
         </div>
     </section>
 
@@ -86,11 +90,15 @@
                     <div class="about-section">
                         <div class="about-text-content">
                             <h2>{{ descriptions.get('about-section1-title', 'Our Story') }}</h2>
-                            <div class="about-text">{{ descriptions.get('about-section1-text', 'At Mayday Plumbing, we have been proudly serving the Salem, Roanoke, and surrounding Virginia areas with professional plumbing services. Our commitment to excellence and customer satisfaction has made us a trusted name in the community.') | safe }}</div>
+							<!-- Original dynamic format -->
+                            <!-- <div class="about-text">{{ descriptions.get('about-section1-text', 'At Mayday Plumbing, we have been proudly serving the Salem, Roanoke, and surrounding Virginia areas with professional plumbing services. Our commitment to excellence and customer satisfaction has made us a trusted name in the community.') | safe }}</div> -->
+							<div class="about-text">
+								<p>Nathan and Amanda May have created Mayday Plumbing from the ground up. This husband-and-wife duo is unmatched in providing the best licensed plumbers in Roanoke, VA.</p>
+							</div>
                         </div>
                         <div class="about-image">
                             <div class="image-container" data-image-key="about1">
-                                <img src="/static/img/headshot.jpeg" alt="About Image 1">
+                                <img src="/static/img/headshot.jpeg" alt="About Image 1a">
                                 {% if admin == true %}
                                 <button class="image-upload-btn" title="Replace Image">
                                     <i class="fas fa-camera"></i>
@@ -99,13 +107,31 @@
                                 {% endif %}
                             </div>
                         </div>
+						<div class="about-image">
+                            <div class="image-container" data-image-key="about1">
+                                <img src="/static/img/hero-bg.jpg" alt="About Image 1b">
+                                {% if admin == true %}
+                                <button class="image-upload-btn" title="Replace Image">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                                {% endif %}
+                            </div>
+                        </div>
+						<div class="about-text-content">
+							<div class="about-text">
+								<p>However, they wouldn't be anywhere without their trusty sidekick and beloved mascot, Benny the Buoy! He keeps us on track to detect the tricky leak, making sure your pipes are clear and that your water and sewage lines are working as they should. Because we value our home and our family, we carry that value with us to each of our clients because we understand the heavy demands of a busy family and the importance of a working plumbing system!</p>
+							</div>
+                        </div>
                     </div>
 
                     <!-- About Section 2 -->
-                    <div class="about-section reverse">
+                    <div class="about-section">
                         <div class="about-text-content">
                             <h2>{{ descriptions.get('about-section2-title', 'Our Team') }}</h2>
-                            <div class="about-text">{{ descriptions.get('about-section2-text', 'Our experienced team of licensed professionals brings years of expertise to every job. We pride ourselves on providing reliable, efficient, and honest plumbing services to residential and commercial customers.') | safe }}</div>
+                            <div class="about-text">
+								<p>Our team is experienced, licensed, and has the expertise to provide you with the best licensed plumbers in Roanoke, VA! We're equipped to provide you with a Class A Contractor, guaranteed quality, and fair pricing. What better way to give back to our community than by ensuring each and every home has working, reliable plumbing?</p>
+							</div>
                         </div>
                         <div class="about-image">
                             <div class="image-container" data-image-key="about2">
@@ -119,12 +145,47 @@
                             </div>
                         </div>
                     </div>
+					
+					<!-- About Section 3 -->
+					<div class="about-services-section">
+						<div class="about-text-content">
+                            <h2>Our Services</h2>
+                            <div class="about-text">
+								<p>Mayday Plumbing provides more than just fixing a clogged toilet, a leaky sink, and low shower water pressure. Our team does it all, from whole-home repiping to scoping your sewage lines. All you have to do is pick up the phone and tell us the issue. We'll provide an estimate before we do any work!</p>
+							</div>
+                        </div>
+						<div class="services-list-grid" id="servicesGrid">
+							<div class="service-list-item" data-service-id="1" draggable="false">
+								<div class="service-icon">
+									<i class="fas fa-search"></i>
+								</div>
+								<h3>Leak Detection and Repair</h3>
+								<p>Mayday Plumbing identifies, locates, and fixes leaks in water, sewage, and gas pipes to keep your family safe and your home functional. By finding and fixing leaks, we are saving you time and money from costly damage caused by leaks that weren't found in time. We are fast and efficient.</p>
+							</div>
+							<div class="service-list-item" data-service-id="2" draggable="false">
+								<div class="service-icon">
+									<i class="fas fa-wrench"></i>
+								</div>
+								<h3>Plumbing Fixture Installation</h3>
+								<p>When it's time for a toilet or sink upgrade, give us a call! Benny and our team will be more than happy to lend a helping hand. Our pros are here to save you from the frustration of alignment, hooking up the water, and testing the feature to ensure it works properly. All you need to do is tell us what the fixture is, where it goes, and we'll handle the rest for a stress-free upgrade to your lovely home!</p>
+							</div>
+							<div class="service-list-item" data-service-id="3" draggable="false">
+								<div class="service-icon">
+									<i class="fas fa-thermometer-half"></i>
+								</div>
+								<h3>Water Heater Diagnostics, Repair, and Installation</h3>
+								<p>Mayday Plumbing inspects, identifies issues, and repairs your water heater. If the problem cannot be fixed, we will handle the installation for you as well. Providing all-in-one services means we value you as our client. Why send you through the run-of-the-mill when we have the required experience and skill to do it all?</p>
+							</div>
+						</div>
+					</div>
 
-                    <!-- About Section 3 -->
+                    <!-- About Section 4 -->
                     <div class="about-section">
                         <div class="about-text-content">
                             <h2>{{ descriptions.get('about-section3-title', 'Our Commitment') }}</h2>
-                            <div class="about-text">{{ descriptions.get('about-section3-text', 'We are committed to providing exceptional service with transparent pricing and no hidden fees. As a licensed Virginia Class A Contractor, we stand behind our work with comprehensive warranties and guarantee your satisfaction.') | safe }}</div>
+                            <div class="about-text">
+								<p>Mayday Plumbing provides the best licensed plumbers in Roanoke, VA, because we care about our community and its residents. No matter the job, we ensure it gets done right and efficiently every time. If you need reliable plumbing help, call Mayday Plumbing today and experience why your neighbors trust Benny the Buoy and crew! We provide leak detection and repair, plumbing fixture installation, water heater diagnostics, repair, and installation, and so much more to Salem, Roanoke, Dalesville, and the surrounding areas in Virginia.</p>
+							</div>
                         </div>
                         <div class="about-image">
                             <div class="image-container" data-image-key="about3">

@@ -286,8 +286,10 @@ a:hover {
 .hero-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
+    max-width: 80%;
     padding: 2rem;
+	margin-top: 40px;
+	margin-bottom: 40px;
 }
 
 .hero-title {
@@ -389,9 +391,19 @@ section {
     margin: 0 auto;
 }
 
+.section-footer p {
+	text-align: center;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+	margin: 0 auto;
+	padding-top: 60px;
+}
+
 /* All Services Section */
 .all-services-section {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .services-list-grid {
@@ -444,7 +456,8 @@ section {
 
 /* Services Section */
 .services-section {
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-primary);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .services-grid {
@@ -572,6 +585,7 @@ section {
 /* FAQ Section */
 .faq-section {
     background-color: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .search-container {
@@ -1847,7 +1861,9 @@ section {
 .about-header p {
     font-size: 1.125rem;
     color: rgba(255, 255, 255, 0.9);
-    max-width: 600px;
+	/* original */
+    /* max-width: 600px; */
+	max-width: 800px;
     margin: 0 auto;
 }
 
@@ -3668,4 +3684,73 @@ section {
 .font-error-text::before {
     content: '⚠️';
     font-size: 0.875rem;
+}
+
+/* Our Story Section - Home */
+.our-story-section {
+    background: var(--bg-primary);
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.our-story-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+	gap: 30px;
+}
+
+.our-story-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.our-story-image {
+	border-radius: 1rem;
+	/* Current image's aspect ratio is 1:1 */
+	width: 300px;
+	height: 300px;
+}
+
+/* Our Team Section - Home */
+.our-team-section {
+    background: var(--bg-primary);
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.our-team-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+	gap: 30px;
+}
+
+.our-team-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.our-team-image {
+	border-radius: 1rem;
+	width: 450px;
+	height: 300px;
+}
+
+/* About Page */
+.about-services-section {
+    display: flex;
+	flex-direction: column;
+    gap: 3rem;
+    align-items: center;
+    background: white;
+    padding: 3rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-md);
 }

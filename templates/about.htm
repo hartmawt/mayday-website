@@ -90,11 +90,15 @@
                     <div class="about-section">
                         <div class="about-text-content">
                             <h2>{{ descriptions.get('about-section1-title', 'Our Story') }}</h2>
-                            <div class="about-text">{{ descriptions.get('about-section1-text', 'At Mayday Plumbing, we have been proudly serving the Salem, Roanoke, and surrounding Virginia areas with professional plumbing services. Our commitment to excellence and customer satisfaction has made us a trusted name in the community.') | safe }}</div>
+							<!-- Original -->
+                            <!-- <div class="about-text">{{ descriptions.get('about-section1-text', 'At Mayday Plumbing, we have been proudly serving the Salem, Roanoke, and surrounding Virginia areas with professional plumbing services. Our commitment to excellence and customer satisfaction has made us a trusted name in the community.') | safe }}</div> -->
+							<div class="about-text">
+								<p>Nathan and Amanda May have created Mayday Plumbing from the ground up. This husband-and-wife duo is unmatched in providing the best licensed plumbers in Roanoke, VA.</p>
+							</div>
                         </div>
                         <div class="about-image">
                             <div class="image-container" data-image-key="about1">
-                                <img src="/static/img/headshot.jpeg" alt="About Image 1">
+                                <img src="/static/img/headshot.jpeg" alt="About Image 1a">
                                 {% if admin == true %}
                                 <button class="image-upload-btn" title="Replace Image">
                                     <i class="fas fa-camera"></i>
@@ -102,6 +106,22 @@
                                 <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
                                 {% endif %}
                             </div>
+                        </div>
+						<div class="about-image">
+                            <div class="image-container" data-image-key="about1">
+                                <img src="/static/img/hero-bg.jpg" alt="About Image 1b">
+                                {% if admin == true %}
+                                <button class="image-upload-btn" title="Replace Image">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <input type="file" class="image-upload-input" accept="image/*" style="display: none;">
+                                {% endif %}
+                            </div>
+                        </div>
+						<div class="about-text-content">
+							<div class="about-text">
+								<p>However, they wouldn't be anywhere without their trusty sidekick and beloved mascot, Benny the Buoy! He keeps us on track to detect the tricky leak, making sure your pipes are clear and that your water and sewage lines are working as they should. Because we value our home and our family, we carry that value with us to each of our clients because we understand the heavy demands of a busy family and the importance of a working plumbing system!</p>
+							</div>
                         </div>
                     </div>
 

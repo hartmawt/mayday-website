@@ -204,19 +204,39 @@ class HouseCallProIntegration:
 
     def get_services(self):
         services = {"online_bookable": []}
-        
-        resp = self.session.get(SERVICES_URL)
-        services_json = json.loads(resp.text)
-        for service in services_json.get("data"):
-            services["online_bookable"].append({
-                "uuid": service["uuid"],
-                "name": service["name"],
-                "description": service["description"],
-                "image": service["image"] or "/static/img/service.png",
-                "price": int(service["price"]) / (10 ** 2) if service["price"] else ""
-            })
-        
-        logger.info("Successfully gathered services")
+
+        try:
+            resp = self.session.get(SERVICES_URL)
+            logger.info(f"HCP API response status: {resp.status_code}")
+
+            if resp.status_code != 200:
+                logger.error(f"HCP API error: {resp.status_code} - {resp.text[:200]}")
+                return services
+
+            services_json = json.loads(resp.text)
+            logger.info(f"HCP API response keys: {list(services_json.keys()) if services_json else 'None'}")
+
+            data = services_json.get("data")
+            if not data:
+                logger.warning("No 'data' key in HCP API response or data is empty")
+                logger.info(f"Full response: {services_json}")
+                return services
+
+            for service in data:
+                services["online_bookable"].append({
+                    "uuid": service["uuid"],
+                    "name": service["name"],
+                    "description": service["description"],
+                    "image": service["image"] or "/static/img/service.png",
+                    "price": int(service["price"]) / (10 ** 2) if service["price"] else ""
+                })
+
+            logger.info(f"Successfully gathered {len(services['online_bookable'])} HCP services")
+
+        except Exception as e:
+            logger.error(f"Error in HCP get_services: {e}")
+            logger.error(f"Response text: {resp.text[:500] if 'resp' in locals() else 'No response'}")
+            return services
         
         return services
 

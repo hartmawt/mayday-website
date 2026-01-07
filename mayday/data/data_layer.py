@@ -12,10 +12,10 @@ import pytz
 from collections import Counter
 from aiopg.connection import psycopg2
 from datetime import datetime, timezone, timedelta
-from playwright.async_api import async_playwright
 
 from mayday.data.default_config import DEFAULT_SERVICES, DEFAULT_FAQS, DEFAULT_DESCRIPTIONS, AVAILABLE_ICONS
 from mayday.logger import logger
+from mayday.business_api import GoogleBusinessAPI
 
 
 POSTGRES_DB = os.environ["POSTGRES_DB"]
@@ -1246,241 +1246,23 @@ class PostgresDataLayer:
         return {"rating": None, "review_count": None, "source": "cache_miss"}
 
     async def get_google_rating_fresh(self):
-        """Fetch fresh Google rating using Playwright - for background task only"""
+        """Fetch fresh Google rating using Business API - for background task only"""
         try:
-            # Google Maps place ID extracted from the embed URL
-            place_id = "0x43c9de3b04e0b86f:0x20e2b6a876ac4221"
-            
-            async with async_playwright() as p:
-                # Launch browser with more realistic settings
-                browser = await p.chromium.launch(
-                    headless=True,
-                    args=[
-                        '--no-sandbox',
-                        '--disable-blink-features=AutomationControlled',
-                        '--disable-web-security',
-                        '--disable-features=VizDisplayCompositor'
-                    ]
-                )
-                context = await browser.new_context(
-                    user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    viewport={'width': 1366, 'height': 768},
-                    locale='en-US',
-                    timezone_id='America/New_York'
-                )
-                
-                # Add stealth settings
-                await context.add_init_script("""
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined,
-                    });
-                """)
-                
-                page = await context.new_page()
-                
-                # Use the most direct Google Maps URL that worked in the logs
-                url = f"https://www.google.com/maps/@37.4919741,-80.3193605,10z/data=!4m6!3m5!1s{place_id}!8m2!3d37.4919741!4d-80.3193605!16s%2Fg%2F11qp8y8y8y"
-                
-                rating = None
-                review_count = 0
-                
-                logger.info(f"Loading Google Maps rating from: {url}")
-                
-                try:
-                    # Load the page with optimized settings
-                    await page.goto(url, wait_until='domcontentloaded', timeout=10000)
-                    # Reduced wait time since we know the successful selector pattern
-                    await page.wait_for_timeout(2000)
-                    
-                    # Check if we hit a CAPTCHA or sorry page
-                    final_url = page.url
-                    if 'sorry' in final_url or 'captcha' in final_url:
-                        logger.warning(f"Hit Google CAPTCHA/sorry page: {final_url}")
-                        raise Exception("CAPTCHA detected")
-                    
-                    logger.info(f"Successfully loaded Maps page: {final_url}")
-                    
-                    # Prioritize selectors that worked in the logs, check them first
-                    priority_selectors = [
-                        ('div.F7nice span', 'rating'),  # This worked for rating
-                        ('button span', 'review'),  # This selector actually found the 71 reviews
-                        ('button[jsaction*="review"] span', 'review'),  # Previous attempt
-                        ('button[jsaction*="review"]', 'review'),  # Try without span
-                        ('button[data-value*="review"]', 'review'),  # Alternative review button
-                    ]
-                    
-                    # Try priority selectors first for speed
-                    for selector, data_type in priority_selectors:
-                        try:
-                            elements = await page.query_selector_all(selector)
-                            for element in elements:
-                                text = await element.text_content()
-                                if text and text.strip():
-                                    if data_type == 'rating':
-                                        try:
-                                            potential_rating = float(text.strip().replace(',', '.'))
-                                            if 1.0 <= potential_rating <= 5.0:
-                                                rating = potential_rating
-                                                logger.info(f"Found rating: {rating} using priority selector: {selector}")
-                                                break
-                                        except (ValueError, TypeError):
-                                            continue
-                                    elif data_type == 'review':
-                                        # Look for numbers in review text - be more specific
-                                        review_match = re.search(r'(\d+(?:,\d+)*)\s*(?:review|Review)(?:s)?(?:\s|$)', text)
-                                        if review_match:
-                                            potential_count = int(review_match.group(1).replace(',', ''))
-                                            # Validate review count is reasonable for a local business
-                                            if 1 <= potential_count <= 500:
-                                                review_count = potential_count
-                                                logger.info(f"Found review count: {review_count} using priority selector: {selector}")
-                                                break
-                                            else:
-                                                logger.debug(f"Rejected unreasonable review count: {potential_count}")
-                                                continue
-                            if (data_type == 'rating' and rating) or (data_type == 'review' and review_count):
-                                break
-                        except Exception as e:
-                            logger.debug(f"Error with priority selector {selector}: {e}")
-                            continue
-                    
-                    # If priority selectors found both, we're done quickly
-                    if rating and review_count:
-                        logger.info("Found both rating and review count using priority selectors")
-                    else:
-                        # Fallback to comprehensive search only if needed
-                        logger.info("Using fallback selectors for missing data")
-                        
-                        # Fallback rating selectors
-                        if not rating:
-                            rating_selectors = [
-                                'span.ceNzKf', 'span[data-value]', 'span.Aq14fc',
-                                'div[data-value] span', 'span[aria-label*="star"]', 'span[jsaction*="rating"]'
-                            ]
-                            for selector in rating_selectors:
-                                try:
-                                    elements = await page.query_selector_all(selector)
-                                    for element in elements:
-                                        text = await element.text_content()
-                                        if text and text.strip():
-                                            try:
-                                                potential_rating = float(text.strip().replace(',', '.'))
-                                                if 1.0 <= potential_rating <= 5.0:
-                                                    rating = potential_rating
-                                                    logger.info(f"Found rating: {rating} using fallback selector: {selector}")
-                                                    break
-                                            except (ValueError, TypeError):
-                                                continue
-                                    if rating:
-                                        break
-                                except Exception:
-                                    continue
-                        
-                        # Fallback review count selectors (reduced since priority selectors should work)
-                        if not review_count:
-                            review_selectors = [
-                                'button span',  # This works, so include it in fallback too
-                                'span.RDApEe', 'button[data-value] span', 'span[aria-label*="review"]',
-                                'a[data-value] span', 'div.F7nice button span'
-                            ]
-                            logger.debug(f"Trying {len(review_selectors)} fallback selectors for review count")
-                            for selector in review_selectors:
-                                try:
-                                    elements = await page.query_selector_all(selector)
-                                    for element in elements:
-                                        text = await element.text_content()
-                                        if text and text.strip():
-                                            review_match = re.search(r'(\d+(?:,\d+)*)\s*(?:review|Review)(?:s)?(?:\s|$)', text)
-                                            if review_match:
-                                                potential_count = int(review_match.group(1).replace(',', ''))
-                                                # Validate review count is reasonable 
-                                                if 1 <= potential_count <= 500:
-                                                    review_count = potential_count
-                                                    logger.info(f"Found review count: {review_count} using fallback selector: {selector}")
-                                                    break
-                                                else:
-                                                    logger.debug(f"Rejected unreasonable review count from selector: {potential_count}")
-                                                    continue
-                                    if review_count:
-                                        break
-                                except Exception:
-                                    continue
-                        
-                        # Final text-based fallback if selectors fail
-                        if not rating or not review_count:
-                            page_text = await page.text_content('body')
-                            
-                            if not rating:
-                                rating_patterns = [r'(\d\.\d)\s*(?:out of 5|/5|★)', r'(\d\.\d)\s*stars?']
-                                for pattern in rating_patterns:
-                                    match = re.search(pattern, page_text)
-                                    if match:
-                                        potential_rating = float(match.group(1))
-                                        if 1.0 <= potential_rating <= 5.0:
-                                            rating = potential_rating
-                                            logger.info(f"Found rating from text pattern: {rating}")
-                                            break
-                            
-                            if not review_count:
-                                logger.debug("Attempting comprehensive text search for review count")
-                                
-                                # More comprehensive review patterns
-                                review_patterns = [
-                                    r'(\d+)\s*reviews?(?:\s|$)',  # "71 reviews"
-                                    r'(\d+)\s*Google\s*reviews?',  # "71 Google reviews"
-                                    r'Based on (\d+)\s*reviews?',  # "Based on 71 reviews"
-                                    r'(\d+)\s*reviews?\s*on\s+Google',  # "71 reviews on Google"
-                                    r'(\d+)\s*review(?:s)?\b',  # "71 review" or "71 reviews" with word boundary
-                                ]
-                                
-                                all_found_counts = []
-                                for pattern in review_patterns:
-                                    matches = re.findall(pattern, page_text, re.IGNORECASE)
-                                    if matches:
-                                        for match in matches:
-                                            count = int(match.replace(',', ''))
-                                            if 5 <= count <= 200:  # Reasonable range
-                                                all_found_counts.append(count)
-                                                logger.info(f"Found potential review count: {count} with pattern: {pattern}")
-                                
-                                if all_found_counts:
-                                    # Use the most common count, or the first reasonable one
-                                    count_frequency = Counter(all_found_counts)
-                                    review_count = count_frequency.most_common(1)[0][0]
-                                    logger.info(f"Selected review count: {review_count} from candidates: {all_found_counts}")
-                                else:
-                                    logger.warning("No reasonable review count found in text")
-                            
-                except Exception as e:
-                    logger.error(f"Error loading Google Maps: {e}")
-                    # Don't continue since we only have one URL now
-                
-                await browser.close()
-                
-                # Validate results
-                if rating and (rating < 1.0 or rating > 5.0):
-                    logger.warning(f"Rating {rating} is out of valid range (1.0-5.0), discarding")
-                    rating = None
-                
-                if review_count and (review_count > 500 or review_count < 5):
-                    logger.warning(f"Review count {review_count} seems unreasonable for a local business, discarding")
-                    review_count = 0
-                
-                if rating:
-                    logger.info(f"Successfully scraped Google Maps rating: {rating} ({review_count} reviews)")
-                    return {
-                        "rating": rating,
-                        "review_count": review_count,
-                        "source": "maps_scraped"
-                    }
-                else:
-                    logger.warning("Could not find rating using Google Maps")
-                    return {"rating": None, "review_count": None, "source": "not_found"}
-                    
-        except Exception as e:
-            logger.error(f"Error scraping Google rating with Playwright: {e}")
-            return {"rating": None, "review_count": None, "source": "error"}
+            business_api = GoogleBusinessAPI()
+            rating_data = await business_api.get_rating_summary()
 
+            logger.info(f"Successfully fetched rating from Business API: {rating_data}")
+            return rating_data
+
+        except Exception as e:
+            logger.error(f"Error fetching Google rating from Business API: {e}")
+            # Return fallback data based on known information
+            return {
+                "rating": None,
+                "review_count": None,
+                "source": "api_error",
+                "error": str(e)
+            }
     async def get_google_reviews(self):
         """Get Google reviews from cache"""
         # Try to get from cache first
@@ -1493,269 +1275,22 @@ class PostgresDataLayer:
         return {"reviews": [], "total_found": 0, "source": "cache_miss"}
 
     async def get_google_reviews_fresh(self):
-        """Fetch fresh Google reviews using Playwright - for background task only"""
+        """Fetch fresh Google reviews using Business API - for background task only"""
         try:
-            # Google Maps place ID extracted from the embed URL
-            place_id = "0x43c9de3b04e0b86f:0x20e2b6a876ac4221"
-            
-            async with async_playwright() as p:
-                # Launch browser with more realistic settings
-                browser = await p.chromium.launch(
-                    headless=True,
-                    args=[
-                        '--no-sandbox',
-                        '--disable-blink-features=AutomationControlled',
-                        '--disable-web-security',
-                        '--disable-features=VizDisplayCompositor'
-                    ]
-                )
-                context = await browser.new_context(
-                    user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    viewport={'width': 1366, 'height': 768},
-                    locale='en-US',
-                    timezone_id='America/New_York'
-                )
-                
-                # Add stealth settings
-                await context.add_init_script("""
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined,
-                    });
-                """)
-                
-                page = await context.new_page()
-                
-                # Use Google Maps URL that shows reviews
-                url = f"https://www.google.com/maps/place/Mayday+Plumbing+LLC/@37.4919741,-80.3193605,17z/data=!3m1!4b1!4m6!3m5!1s{place_id}!8m2!3d37.4919741!4d-80.3193605!16s%2Fg%2F11qp8y8y8y"
-                
-                reviews = []
-                
-                logger.info(f"Loading Google Maps reviews from: {url}")
-                
-                try:
-                    # Load the page with optimized settings
-                    await page.goto(url, wait_until='domcontentloaded', timeout=15000)
-                    await page.wait_for_timeout(3000)
-                    
-                    # Check if we hit a CAPTCHA or sorry page
-                    final_url = page.url
-                    if 'sorry' in final_url or 'captcha' in final_url:
-                        logger.warning(f"Hit Google CAPTCHA/sorry page: {final_url}")
-                        raise Exception("CAPTCHA detected")
-                    
-                    logger.info(f"Successfully loaded Maps page: {final_url}")
-                    
-                    # Try to click the Reviews tab to load all reviews
-                    try:
-                        reviews_tab_clicked = False
-                        
-                        # Look for the Reviews tab using the specific selector you provided
-                        reviews_tab_selectors = [
-                            'button[role="tab"][aria-label*="Reviews for Mayday Plumbing"]',  # Your specific selector
-                            'button[role="tab"][aria-label*="Reviews"]',  # More general Reviews tab
-                            'button.hh2c6[aria-label*="Reviews"]',  # Using the class from your example
-                            'button[data-tab-index="1"]',  # Using the data-tab-index
-                            'div.Gpq6kf.NlVald:has-text("Reviews")',  # The text content
-                        ]
-                        
-                        for selector in reviews_tab_selectors:
-                            try:
-                                if 'has-text' in selector:
-                                    # Handle text-based selector differently
-                                    elements = await page.query_selector_all('button[role="tab"]')
-                                    for element in elements:
-                                        try:
-                                            text_content = await element.text_content()
-                                            aria_label = await element.get_attribute('aria-label')
-                                            if (text_content and 'Reviews' in text_content) or (aria_label and 'Reviews' in aria_label):
-                                                await element.click()
-                                                await page.wait_for_timeout(3000)  # Wait for reviews to load
-                                                logger.info(f"Clicked Reviews tab by text content: {text_content or aria_label}")
-                                                reviews_tab_clicked = True
-                                                break
-                                        except Exception:
-                                            continue
-                                else:
-                                    element = await page.query_selector(selector)
-                                    if element:
-                                        await element.click()
-                                        await page.wait_for_timeout(3000)  # Wait for reviews to load
-                                        aria_label = await element.get_attribute('aria-label')
-                                        logger.info(f"Clicked Reviews tab with selector {selector}: {aria_label}")
-                                        reviews_tab_clicked = True
-                                        break
-                            except Exception as e:
-                                logger.debug(f"Could not click Reviews tab with selector {selector}: {e}")
-                                continue
-                            
-                            if reviews_tab_clicked:
-                                break
-                        
-                        if not reviews_tab_clicked:
-                            logger.info("Could not find or click Reviews tab, trying fallback methods")
-                            # Fallback: try the old approach with sort button
-                            try:
-                                sort_button = await page.query_selector('button[data-value="Sort"]')
-                                if sort_button:
-                                    await sort_button.click()
-                                    await page.wait_for_timeout(2000)
-                                    logger.info("Clicked sort button as fallback")
-                            except Exception:
-                                logger.debug("Sort button fallback also failed")
-                            
-                    except Exception as e:
-                        logger.debug(f"Error trying to click Reviews tab: {e}")
-                    
-                    # Look for review elements with various selectors
-                    review_selectors = [
-                        'div[data-review-id]',  # Direct review containers
-                        'div.ODSEW-ShBeI',      # Google's review container class
-                        'div.MyEned',           # Alternative review class
-                        'div.jftiEf',           # Another review container
-                        'div[jsname="fK8dgd"]', # Review with jsname
-                    ]
-                    
-                    all_review_elements = []
-                    for selector in review_selectors:
-                        try:
-                            elements = await page.query_selector_all(selector)
-                            all_review_elements.extend(elements)
-                            if elements:
-                                logger.info(f"Found {len(elements)} potential review elements with selector: {selector}")
-                        except Exception:
-                            continue
-                    
-                    # Process review elements and collect unique reviews
-                    processed_reviews = []
-                    seen_reviews = set()  # Track duplicates by review text + author combo
-                    
-                    for element in all_review_elements[:20]:  # Process more elements to account for duplicates
-                        try:
-                            # Extract review text
-                            review_text_selectors = [
-                                '.wiI7pd',      # Review text class
-                                '.MyEned',      # Alternative text class
-                                'span[jsname="bN97Pc"]',  # Text span
-                                '.review-full-text',
-                            ]
-                            
-                            review_text = ""
-                            for text_selector in review_text_selectors:
-                                try:
-                                    text_element = await element.query_selector(text_selector)
-                                    if text_element:
-                                        review_text = await text_element.text_content()
-                                        if review_text and len(review_text.strip()) > 10:
-                                            break
-                                except Exception:
-                                    continue
-                            
-                            # Extract rating (number of stars)
-                            rating_selectors = [
-                                'span[aria-label*="star"]',
-                                'div[aria-label*="star"]',
-                                'span.kvMYJc',  # Star rating class
-                                'div.DU9Pgb',   # Rating container
-                            ]
-                            
-                            rating = 0
-                            for rating_selector in rating_selectors:
-                                try:
-                                    rating_element = await element.query_selector(rating_selector)
-                                    if rating_element:
-                                        aria_label = await rating_element.get_attribute('aria-label')
-                                        if aria_label:
-                                            # Extract rating from aria-label like "5 stars" or "Rated 4 out of 5 stars"
-                                            rating_match = re.search(r'(\d+)\s*(?:star|out of)', aria_label)
-                                            if rating_match:
-                                                rating = int(rating_match.group(1))
-                                                break
-                                except Exception:
-                                    continue
-                            
-                            # Extract author name
-                            author_selectors = [
-                                '.d4r55',       # Author name class
-                                '.X43Kjb',      # Alternative author class
-                                'div[data-href*="contrib"]',
-                            ]
-                            
-                            author_name = "Google User"
-                            for author_selector in author_selectors:
-                                try:
-                                    author_element = await element.query_selector(author_selector)
-                                    if author_element:
-                                        author_text = await author_element.text_content()
-                                        if author_text and len(author_text.strip()) > 0:
-                                            author_name = author_text.strip()
-                                            break
-                                except Exception:
-                                    continue
-                            
-                            # Extract relative time
-                            time_selectors = [
-                                '.rsqaWe',      # Time class
-                                '.DrKgpb',      # Alternative time class
-                                'span[title]',  # Time with title attribute
-                            ]
-                            
-                            relative_time = ""
-                            for time_selector in time_selectors:
-                                try:
-                                    time_element = await element.query_selector(time_selector)
-                                    if time_element:
-                                        time_text = await time_element.text_content()
-                                        if time_text and ('ago' in time_text.lower() or 'month' in time_text.lower() or 'week' in time_text.lower()):
-                                            relative_time = time_text.strip()
-                                            break
-                                except Exception:
-                                    continue
-                            
-                            # Only include reviews with 5 stars and actual text
-                            if rating == 5 and review_text and len(review_text.strip()) > 20:
-                                # Create a unique identifier for this review to detect duplicates
-                                review_id = f"{author_name}:{review_text.strip()[:100]}"  # Use first 100 chars + author
-                                
-                                if review_id not in seen_reviews:
-                                    seen_reviews.add(review_id)
-                                    processed_reviews.append({
-                                        'author': author_name,
-                                        'rating': rating,
-                                        'text': review_text.strip(),
-                                        'relative_time': relative_time or 'Recently'
-                                    })
-                                    logger.info(f"Found {rating}-star review by {author_name}: {review_text[:50]}...")
-                                else:
-                                    logger.debug(f"Skipping duplicate review by {author_name}")
-                        
-                        except Exception as e:
-                            logger.debug(f"Error processing review element: {e}")
-                            continue
-                
-                except Exception as e:
-                    logger.error(f"Error loading Google Maps reviews: {e}")
-                
-                await browser.close()
-                
-                # Use processed_reviews (without duplicates) as our final reviews list
-                reviews = processed_reviews
-                
-                logger.info(f"Successfully found {len(reviews)} high-quality reviews")
-                return {
-                    "reviews": reviews[:10],  # Return up to 10 reviews
-                    "total_found": len(reviews),
-                    "source": "maps_scraped"
-                }
-                    
+            business_api = GoogleBusinessAPI()
+            reviews_data = await business_api.fetch_all_reviews()
+
+            logger.info(f"Successfully fetched {reviews_data.get('total_found', 0)} reviews from Business API")
+            return reviews_data
+
         except Exception as e:
-            logger.error(f"Error fetching Google reviews with Playwright: {e}")
+            logger.error(f"Error fetching Google reviews from Business API: {e}")
             return {
                 "reviews": [],
                 "total_found": 0,
-                "source": "error",
+                "source": "api_error",
                 "error": str(e)
             }
-
     # HCP Cache Management Methods
     async def get_hcp_services(self):
         """Get HCP services from cache"""

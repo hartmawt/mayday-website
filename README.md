@@ -42,10 +42,11 @@ git clone <repository-url>
 cd mayday_v2
 ```
 
-### 2. Create Environment File
+### 2. Create Environment File and export
 Copy the sample environment file and configure your settings:
 ```bash
 cp .env.sample .env
+export $(grep -v '^#' .env | xargs)
 ```
 
 Edit `.env` with your specific configuration (see Configuration section below).
@@ -66,31 +67,7 @@ The application will be available at `http://localhost:8000`
 
 ### Required Environment Variables
 
-Create a `.env` file with the following settings:
-
-```bash
-# Database Configuration
-POSTGRES_ADMIN_USER=your_db_user
-POSTGRES_ADMIN_PASSWORD=your_db_password
-
-# Session Management
-SESSION_COOKIE_NAME=MAYDAY
-SESSION_TIMEOUT=60
-
-# Email Configuration (for contact forms)
-GMAIL_USERNAME=your-email@gmail.com
-GMAIL_PASSWORD=your-email-password
-MAILER=help@maydayplumbingservice.com
-
-# HouseCall Pro Integration
-HOUSECALLPRO_USERNAME=your_hcp_username
-HOUSECALLPRO_PASSWORD=your_hcp_password
-SERVICE_CATEGORY=pbcat_6a37aed5cdfa46e0b83c3ad4101db1f0
-DOMAIN=pro.housecallpro.com
-CATEGORY_URI=/alpha/pricebook/categories
-SERVICES_URI=/alpha/pricebook/services
-CALENDAR_URI=/alpha/scheduling/calendar_items/organization_calendar_items?start_date=%s&end_date=%s
-```
+Create a `.env` file with the settings defined in the `.env.sample`
 
 ## Database Setup
 
@@ -132,10 +109,22 @@ The application automatically initializes the database schema on first run. No m
 
 ### Local Development Setup
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
+# Create python virtual environment
+python3 -m venv .venv 
 
-# Set up environment
+# Activate the virtual environement
+source .venv/bin/activate
+
+# Install UV
+pip install uv
+
+# Install the project dependencies using UV
+uv sync --frozen
+
+# Install chromium dependencies
+uv run python -m playwright install chromium
+
+# Set up environment (ensure you add the correct values to the real .env)
 cp .env.sample .env
 
 # Run database migrations
@@ -174,34 +163,6 @@ mayday_v2/
 3. **Database Backups**: Set up automated backup schedule
 4. **Monitoring**: Implement health checks and logging
 5. **Updates**: Plan for zero-downtime deployments
-
-### Docker Compose Production
-```yaml
-version: '3.8'
-services:
-  app:
-    build: .
-    ports:
-      - "443:8000"
-    environment:
-      - POSTGRES_HOST=db
-    depends_on:
-      - db
-    restart: unless-stopped
-
-  db:
-    image: postgres:13
-    environment:
-      - POSTGRES_DB=maydayplumbing
-      - POSTGRES_USER=${POSTGRES_ADMIN_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-volumes:
-  postgres_data:
-```
 
 ## API Documentation
 

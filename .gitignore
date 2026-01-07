@@ -9,3 +9,4 @@ env.bak/
 venv.bak/
 logs/
 .claude/memory_logs
+mayday/gcloud_helpers/spec/

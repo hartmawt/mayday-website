@@ -146,7 +146,16 @@
                 <!-- Blog posts loaded from database -->
                 {% for post in blog_posts %}
                 {% set post_image = post.image_data or post.image or '' %}
-                <div class="blog-post-card" data-post-data='{"id":{{ post.id }},"title":"{{ post.title|e }}","author":"{{ post.author|e }}","date":"{{ post.created_at.strftime('%B %d, %Y') if post.created_at else '' }}","content":"{{ post.content|e }}","image":"{{ post_image }}","imageSize":"{{ post.image_size or 'medium' }}"}'>
+                {% set post_data = {
+                    'id': post.id,
+                    'title': post.title,
+                    'author': post.author,
+                    'date': post.created_at.strftime('%B %d, %Y') if post.created_at else '',
+                    'content': post.content,
+                    'image': post_image,
+                    'imageSize': post.image_size or 'medium'
+                } %}
+                <div class="blog-post-card" data-post-data="{{ post_data|tojson|e }}">
                     {% if post_image %}
                     <div class="blog-post-image">
                         <img src="{{ post_image }}" alt="{{ post.title }}">
@@ -174,7 +183,15 @@
                 </div>
                 {% else %}
                 <!-- Show welcome post if no posts exist -->
-                <div class="blog-post-card" data-post-data='{"title":"Welcome to Our Blog","author":"Mayday Plumbing Team","date":"December 15, 2024","content":"&lt;p&gt;We are excited to share our expertise and insights with you through our new blog!&lt;/p&gt;&lt;p&gt;Here you will find:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Expert Plumbing Tips&lt;/strong&gt; - Learn how to maintain your plumbing systems and prevent common issues&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Industry News&lt;/strong&gt; - Stay updated on the latest plumbing technologies and trends&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Seasonal Advice&lt;/strong&gt; - Get tips for protecting your pipes during winter and preparing for spring&lt;/li&gt;&lt;li&gt;&lt;strong&gt;Emergency Prevention&lt;/strong&gt; - Learn how to spot warning signs before they become major problems&lt;/li&gt;&lt;li&gt;&lt;strong&gt;DIY vs Professional&lt;/strong&gt; - Understand when you can handle repairs yourself and when to call the experts&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Our team at Mayday Plumbing has been serving the Salem, Roanoke, and surrounding Virginia areas for years. We are licensed, insured, and ready to provide professional plumbing services.&lt;/p&gt;&lt;p&gt;Check back regularly for new posts, and do not hesitate to contact us if you have any plumbing questions or need professional service!&lt;/p&gt;","image":"/static/img/hero-bg.jpg","imageSize":"medium"}'>
+                {% set welcome_post_data = {
+                    'title': 'Welcome to Our Blog',
+                    'author': 'Mayday Plumbing Team',
+                    'date': 'December 15, 2024',
+                    'content': '<p>We are excited to share our expertise and insights with you through our new blog!</p><p>Here you will find:</p><ul><li><strong>Expert Plumbing Tips</strong> - Learn how to maintain your plumbing systems and prevent common issues</li><li><strong>Industry News</strong> - Stay updated on the latest plumbing technologies and trends</li><li><strong>Seasonal Advice</strong> - Get tips for protecting your pipes during winter and preparing for spring</li><li><strong>Emergency Prevention</strong> - Learn how to spot warning signs before they become major problems</li><li><strong>DIY vs Professional</strong> - Understand when you can handle repairs yourself and when to call the experts</li></ul><p>Our team at Mayday Plumbing has been serving the Salem, Roanoke, and surrounding Virginia areas for years. We are licensed, insured, and ready to provide professional plumbing services.</p><p>Check back regularly for new posts, and do not hesitate to contact us if you have any plumbing questions or need professional service!</p>',
+                    'image': '/static/img/hero-bg.jpg',
+                    'imageSize': 'medium'
+                } %}
+                <div class="blog-post-card" data-post-data="{{ welcome_post_data|tojson|e }}">
                     <div class="blog-post-image">
                         <img src="/static/img/hero-bg.jpg" alt="Welcome to our blog">
                     </div>

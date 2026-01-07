@@ -1312,15 +1312,15 @@ class PostgresDataLayer:
             # Get services from HCP integration
             services_data = hcp.get_services()
 
-            if services_data:
-                logger.info(f"Successfully fetched {len(services_data)} HCP services")
+            if services_data and services_data.get("online_bookable"):
+                logger.info(f"Successfully fetched {len(services_data.get('online_bookable', []))} HCP services")
                 return {
                     "services": services_data,
                     "source": "hcp_fresh",
-                    "total_found": len(services_data)
+                    "total_found": len(services_data.get("online_bookable", []))
                 }
             else:
-                logger.warning("No HCP services data returned")
+                logger.info("No HCP services data returned (may be due to login timing)")
                 return {"services": [], "source": "hcp_empty", "total_found": 0}
 
         except Exception as e:
@@ -1518,18 +1518,43 @@ class APICacheRefresher:
             logger.error(f"Error refreshing reviews cache: {e}")
 
     async def refresh_hcp_services_cache(self):
-        """Refresh HCP services cache in background"""
-        try:
-            logger.info("Refreshing HCP services cache...")
-            fresh_data = await self.app.data_layer.get_hcp_services_fresh()
-            if fresh_data and fresh_data.get('services'):
-                # Cache HCP services for only 10 minutes due to AWS S3 signed URL expiration (15 min)
-                await self.app.data_layer.set_cached_api_data('hcp_services', fresh_data, cache_duration_hours=10/60)
-                logger.info(f"Successfully cached {len(fresh_data.get('services', []))} HCP services")
-            else:
-                logger.warning("Failed to get fresh HCP services data")
-        except Exception as e:
-            logger.error(f"Error refreshing HCP services cache: {e}")
+        """Refresh HCP services cache in background with retry for login timing"""
+        max_retries = 3
+        retry_delay = 15  # seconds, slightly longer than HCP login time
+
+        for attempt in range(max_retries):
+            try:
+                if attempt > 0:
+                    logger.info(f"Retrying HCP services cache refresh (attempt {attempt + 1}/{max_retries})...")
+                else:
+                    logger.info("Refreshing HCP services cache...")
+
+                fresh_data = await self.app.data_layer.get_hcp_services_fresh()
+
+                # Check if we got actual services or empty due to login timing
+                if fresh_data and fresh_data.get('services') and len(fresh_data.get('services', [])) > 0:
+                    # Cache HCP services for only 10 minutes due to AWS S3 signed URL expiration (15 min)
+                    await self.app.data_layer.set_cached_api_data('hcp_services', fresh_data, cache_duration_hours=10/60)
+                    logger.info(f"Successfully cached {len(fresh_data.get('services', []))} HCP services")
+                    return  # Success, exit retry loop
+
+                elif fresh_data and fresh_data.get('source') == 'hcp_empty' and attempt < max_retries - 1:
+                    # Empty services likely due to login timing - retry after delay
+                    logger.info(f"Got empty HCP services (likely due to login timing), will retry in {retry_delay} seconds...")
+                    await asyncio.sleep(retry_delay)
+                    continue
+
+                else:
+                    logger.warning("Failed to get fresh HCP services data")
+                    break
+
+            except Exception as e:
+                logger.error(f"Error refreshing HCP services cache (attempt {attempt + 1}): {e}")
+                if attempt < max_retries - 1:
+                    logger.info(f"Will retry in {retry_delay} seconds...")
+                    await asyncio.sleep(retry_delay)
+                else:
+                    logger.error("Max retries exceeded for HCP services cache refresh")
 
     async def refresh_all_caches(self):
         """Refresh all caches - used on startup"""

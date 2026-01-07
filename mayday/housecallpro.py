@@ -185,8 +185,14 @@ class HouseCallProIntegration:
             await playwright.close()
     
     def get_calendar(self):
+        # Check if we're logged in before attempting to fetch calendar
+        if not self.logged_in:
+            logger.info("HCP get_calendar called before login completion - login process may still be running")
+            logger.info("Returning empty calendar data")
+            return {"items": []}
+
         now = datetime.now()
-    
+
         # Current month and year
         current_month = now.month
         current_year = now.year
@@ -204,6 +210,12 @@ class HouseCallProIntegration:
 
     def get_services(self):
         services = {"online_bookable": []}
+
+        # Check if we're logged in before attempting to fetch services
+        if not self.logged_in:
+            logger.info("HCP get_services called before login completion - login process may still be running")
+            logger.info("Returning empty services - cache will be refreshed once login completes")
+            return services
 
         try:
             resp = self.session.get(SERVICES_URL)

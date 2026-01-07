@@ -155,7 +155,7 @@
                     'image': post_image,
                     'imageSize': post.image_size or 'medium'
                 } %}
-                <div class="blog-post-card" data-post-data="{{ post_data|tojson|e }}">
+                <div class="blog-post-card" data-post-data="{{ post_data|tojson }}">
                     {% if post_image %}
                     <div class="blog-post-image">
                         <img src="{{ post_image }}" alt="{{ post.title }}">
@@ -191,7 +191,7 @@
                     'image': '/static/img/hero-bg.jpg',
                     'imageSize': 'medium'
                 } %}
-                <div class="blog-post-card" data-post-data="{{ welcome_post_data|tojson|e }}">
+                <div class="blog-post-card" data-post-data="{{ welcome_post_data|tojson }}">
                     <div class="blog-post-image">
                         <img src="/static/img/hero-bg.jpg" alt="Welcome to our blog">
                     </div>

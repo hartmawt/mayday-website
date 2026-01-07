@@ -437,7 +437,16 @@ async function deleteBlogPost(postCard) {
 
 // Open blog post in modal
 function openBlogPost(postCard) {
-    const postData = JSON.parse(postCard.dataset.postData);
+    console.log('Raw postData:', postCard.dataset.postData);
+    let postData;
+    try {
+        postData = JSON.parse(postCard.dataset.postData);
+    } catch (error) {
+        console.error('JSON parsing error:', error);
+        console.error('Problematic JSON:', postCard.dataset.postData);
+        console.error('First 200 chars:', postCard.dataset.postData.substring(0, 200));
+        return;
+    }
     
     // Decode HTML entities
     const decodedContent = decodeHtmlEntities(postData.content);
